@@ -22,14 +22,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { email, password, next } = parsed.data;
+  const { email, password } = parsed.data;
 
-  const [user] = await db
-    .select()
-    .from(users)
-    .where(eq(users.email, email.toLowerCase()))
-    .limit(1);
-
+  const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase())).limit(1);
   if (!user || !user.hashedPassword) {
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }
@@ -44,11 +39,10 @@ export async function POST(req: Request) {
     role: user.role ?? null,
   });
 
-  // create redirect response
-  const redirectUrl = next || "/dashboard";
-  const res = NextResponse.redirect(new URL(redirectUrl, req.url));
+  // ✅ normal JSON response
+  const res = NextResponse.json({ ok: true });
 
-  // attach cookie
+  // ✅ attach cookie here
   res.cookies.set({
     name: COOKIE_NAME,
     value: token,
