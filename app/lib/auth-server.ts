@@ -5,7 +5,7 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function getCurrentUser() {
-  const token = getSessionCookie();
+  const token = await getSessionCookie();
   if (!token) return null;
   try {
     const payload = await verifyJwt(token);
