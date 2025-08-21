@@ -1,11 +1,11 @@
+
 // /app/(auth)/login/page.tsx
 "use client";
 
 import { useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 function LoginForm() {
-  const router = useRouter();
   const sp = useSearchParams();
   const next = sp.get("next") || "/dashboard";
 
@@ -18,16 +18,25 @@ function LoginForm() {
     e.preventDefault();
     setLoading(true);
     setErr(null);
+
     const res = await fetch("/api/auth/login", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, next }),
       headers: { "Content-Type": "application/json" },
     });
+
     setLoading(false);
-    if (res.ok) router.push(next);
-    else {
-      const j = await res.json();
-      setErr(j.error || "Login failed");
+
+    if (!res.ok) {
+      try {
+        const j = await res.json();
+        setErr(j.error || "Login failed");
+      } catch {
+        setErr("Login failed");
+      }
+    } else {
+      // ✅ the API already redirects with Set-Cookie
+      window.location.href = next; 
     }
   }
 

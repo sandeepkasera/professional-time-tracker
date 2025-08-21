@@ -5,11 +5,12 @@ import { db } from "@/app/lib/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { verifyPassword } from "@/app/lib/hash";
-import { signJwt } from "@/app/lib/jwt"; // no need to import setSessionCookie here
+import { signJwt } from "@/app/lib/jwt";
 
 const bodySchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
+  next: z.string().optional(), // allow redirect target
 });
 
 const COOKIE_NAME = "app_session";
@@ -21,7 +22,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { email, password } = parsed.data;
+  const { email, password, next } = parsed.data;
 
   const [user] = await db
     .select()
@@ -43,8 +44,11 @@ export async function POST(req: Request) {
     role: user.role ?? null,
   });
 
-  // 🔑 Attach cookie to response
-  const res = NextResponse.json({ ok: true });
+  // create redirect response
+  const redirectUrl = next || "/dashboard";
+  const res = NextResponse.redirect(new URL(redirectUrl, req.url));
+
+  // attach cookie
   res.cookies.set({
     name: COOKIE_NAME,
     value: token,
