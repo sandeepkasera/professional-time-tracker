@@ -1,6 +1,7 @@
 // /lib/jwt.ts
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 const COOKIE_NAME = "app_session";
@@ -37,8 +38,8 @@ export async function setSessionCookie(token: string) {
   });
 }
 
-export async function clearSessionCookie() {
-  (await cookies()).set({
+export function clearSessionCookie(res: NextResponse) {
+  res.cookies.set({
     name: COOKIE_NAME,
     value: "",
     httpOnly: true,
@@ -47,6 +48,7 @@ export async function clearSessionCookie() {
     secure: process.env.NODE_ENV === "production",
     maxAge: 0,
   });
+  return res;
 }
 
 export async function getSessionCookie() {

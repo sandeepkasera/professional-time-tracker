@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { Button } from "@/app/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/ui/card";
+import { Button } from "@/app/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Briefcase, Clock, BarChart3, CheckCircle } from "lucide-react";
 
 
