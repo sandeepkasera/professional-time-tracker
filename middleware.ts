@@ -20,7 +20,7 @@ export function middleware(req: NextRequest) {
   if (isPublic) return NextResponse.next();
 
   const cookie = req.cookies.get("app_session")?.value;
-  console.log("Middleware cookie:", cookie);
+//   console.log("Middleware cookie:", cookie);
   if (!cookie) {
     const url = req.nextUrl.clone();
     url.pathname = "/login"; // we’ll route alias to (auth)/login
