@@ -1,14 +1,19 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { Button } from "@/app/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/ui/card";
 import { Briefcase, Clock, BarChart3, CheckCircle } from "lucide-react";
 
-const handleLogin = () => {
-  // window.location.href = "/api/login";
-  console.log("Login button clicked");
-};
 
 export default function Page() {
+    console.log("Rendering Landing Page");
+  
+  const router = useRouter();
+
+  const handleSignInClick = () => {
+    // Directly navigate to the dashboard page
+    router.push("/dashboard");
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       <div className="container mx-auto px-4 py-16">
@@ -24,7 +29,7 @@ export default function Page() {
             Professional Services Automation platform designed for consulting organizations. 
             Streamline timesheet management, project tracking, and team collaboration.
           </p>
-          <Button onClick={handleLogin} size="lg" className="text-lg px-8 py-3">
+          <Button onClick={handleSignInClick} size="lg" className="text-lg px-8 py-3">
             Sign In to Get Started
           </Button>
         </div>
