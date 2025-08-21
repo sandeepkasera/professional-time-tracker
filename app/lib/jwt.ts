@@ -1,0 +1,54 @@
+// /lib/jwt.ts
+import { SignJWT, jwtVerify } from "jose";
+import { cookies } from "next/headers";
+
+const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+const COOKIE_NAME = "app_session";
+
+export type JwtPayload = {
+  sub: string;           // user id
+  email?: string | null; // user email
+  role?: string | null;  // app role
+};
+
+export async function signJwt(payload: JwtPayload) {
+  const days = parseInt(process.env.JWT_EXPIRES_DAYS || "7", 10);
+  const exp = Math.floor(Date.now() / 1000) + days * 24 * 60 * 60;
+  return new SignJWT(payload)
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime(exp)
+    .setIssuedAt()
+    .sign(secret);
+}
+
+export async function verifyJwt(token: string) {
+  const { payload } = await jwtVerify(token, secret);
+  return payload as JwtPayload & { exp: number; iat: number };
+}
+
+export async function setSessionCookie(token: string) {
+  cookies().set({
+    name: COOKIE_NAME,
+    value: token,
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+  });
+}
+
+export function clearSessionCookie() {
+  cookies().set({
+    name: COOKIE_NAME,
+    value: "",
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 0,
+  });
+}
+
+export function getSessionCookie() {
+  return cookies().get(COOKIE_NAME)?.value;
+}

@@ -63,7 +63,7 @@ export const users = pgTable("users", {
   hashedPassword: varchar("hashed_password"),
   profileImageUrl: varchar("profile_image_url"),
   customProfileImage: text("custom_profile_image"), // Base64 encoded custom uploaded image
-  role: varchar("role", { enum: ["admin", "project_manager", "consultant"] }).default("consultant"),
+  role: varchar("role", { enum: ["admin", "project_manager", "consultant", "user"] }).default("user"),
   organizationId: integer("organization_id").references(() => organizations.id),
   skills: text("skills").array().default([]),
   hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }),
@@ -288,6 +288,16 @@ export const invoiceLineItems = pgTable("invoice_line_items", {
   userId: varchar("user_id").references(() => users.id),
   roleType: varchar("role_type", { length: 100 }),
   date: date("date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Password reset tokens (no email yet; we’ll return the token from API)
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  token: varchar("token", { length: 255 }).notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
