@@ -28,14 +28,17 @@ export async function verifyJwt(token: string) {
 }
 
 export async function setSessionCookie(token: string) {
-  (await cookies()).set({
+  const res = NextResponse.json({ ok: true });
+  res.cookies.set({
     name: COOKIE_NAME,
     value: token,
     httpOnly: true,
     sameSite: "lax",
     path: "/",
     secure: process.env.NODE_ENV === "production",
+    maxAge: 60 * 60 * 24 * 7, // 7 days
   });
+  return res;
 }
 
 export function clearSessionCookie(res: NextResponse) {
