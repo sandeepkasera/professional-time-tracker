@@ -5,12 +5,14 @@ import { db } from "@/app/lib/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { verifyPassword } from "@/app/lib/hash";
-import { signJwt, setSessionCookie } from "@/app/lib/jwt";
+import { signJwt } from "@/app/lib/jwt"; // no need to import setSessionCookie here
 
 const bodySchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
 });
+
+const COOKIE_NAME = "app_session";
 
 export async function POST(req: Request) {
   const json = await req.json();
@@ -18,9 +20,15 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
+
   const { email, password } = parsed.data;
 
-  const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase())).limit(1);
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, email.toLowerCase()))
+    .limit(1);
+
   if (!user || !user.hashedPassword) {
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }
@@ -29,8 +37,23 @@ export async function POST(req: Request) {
   if (!ok) return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   if (!user.isActive) return NextResponse.json({ error: "Account disabled" }, { status: 403 });
 
-  const token = await signJwt({ sub: user.id, email: user.email ?? null, role: user.role ?? null });
-  await setSessionCookie(token);
+  const token = await signJwt({
+    sub: user.id,
+    email: user.email ?? null,
+    role: user.role ?? null,
+  });
 
-  return NextResponse.json({ ok: true });
+  // 🔑 Attach cookie to response
+  const res = NextResponse.json({ ok: true });
+  res.cookies.set({
+    name: COOKIE_NAME,
+    value: token,
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+  });
+
+  return res;
 }
