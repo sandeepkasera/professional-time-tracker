@@ -27,7 +27,7 @@ export async function verifyJwt(token: string) {
 }
 
 export async function setSessionCookie(token: string) {
-  cookies().set({
+  (await cookies()).set({
     name: COOKIE_NAME,
     value: token,
     httpOnly: true,
@@ -37,8 +37,8 @@ export async function setSessionCookie(token: string) {
   });
 }
 
-export function clearSessionCookie() {
-  cookies().set({
+export async function clearSessionCookie() {
+  (await cookies()).set({
     name: COOKIE_NAME,
     value: "",
     httpOnly: true,
@@ -49,6 +49,6 @@ export function clearSessionCookie() {
   });
 }
 
-export function getSessionCookie() {
-  return cookies().get(COOKIE_NAME)?.value;
+export async function getSessionCookie() {
+  return (await cookies()).get(COOKIE_NAME)?.value;
 }
