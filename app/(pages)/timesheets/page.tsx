@@ -81,10 +81,18 @@ export default function Timesheets() {
     }
     return days;
   };
+interface Project {
+    id: number;
+    name: string;
+}
 
-  const { data: projects } = useQuery({
-    queryKey: ["/api/projects"],
-  });
+const { data: projects = [] } = useQuery<Project[]>({
+  queryKey: ["/api/projects"],
+  queryFn: async () => {
+    const res = await fetch("/api/projects");
+    return res.json();
+  },
+});
 
   const { data: submittedTimesheets } = useQuery({
     queryKey: ["/api/timesheets/submitted"],

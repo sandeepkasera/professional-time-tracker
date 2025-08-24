@@ -5,6 +5,11 @@ import { storage } from "@/app/lib/storage";
 export async function POST(req: Request) {
   try {
     const user = await getCurrentUser();
+
+    if (!user) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
     const { weekCommencing, days } = await req.json();
 
     const savedTimesheets: any[] = [];
@@ -27,7 +32,7 @@ export async function POST(req: Request) {
           }
         } else if (project.hours > 0) {
           const timesheet = await storage.createTimesheet({
-            userId: user.id,
+            userId: user.id, // ✅ now safe because user is not null
             projectId: project.projectId,
             date: day.date,
             hours: project.hours.toString(),
@@ -40,7 +45,10 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ message: "Timesheet saved successfully", timesheets: savedTimesheets });
+    return NextResponse.json({
+      message: "Timesheet saved successfully",
+      timesheets: savedTimesheets,
+    });
   } catch (error) {
     console.error("Error saving timesheet:", error);
     return NextResponse.json({ message: "Failed to save timesheet" }, { status: 500 });

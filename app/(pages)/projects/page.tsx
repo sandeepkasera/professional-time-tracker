@@ -78,13 +78,37 @@ export default function Projects() {
     queryFn: () => apiRequest("GET", "/api/projects").then(res => res.json()),
   });
 
-  const { data: clients } = useQuery({
+  type ProjectRole = any;
+
+
+  interface Client {
+  id: number;
+  name: string;
+  email: string;
+  }
+
+  const { data: clients = [] } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
+    queryFn: async () => {
+      const res = await fetch("/api/clients");
+      return res.json();
+    },
   });
 
-  const { data: users } = useQuery({
-    queryKey: ["/api/admin/users"],
-  });
+interface User {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+const { data: users = [] } = useQuery<User[]>({
+  queryKey: ["/api/admin/users"],
+  queryFn: async () => {
+    const res = await fetch("/api/admin/users");
+    return res.json();
+  },
+});
 
   interface Forecast {
   weekStarting: string;
@@ -557,7 +581,7 @@ interface ResourceForecast {
                       <FormItem>
                         <FormLabel>Description</FormLabel>
                         <FormControl>
-                          <Textarea placeholder="Project description" {...field} />
+                          <Textarea placeholder="Project description" {...field} value={field.value ?? ""} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -577,6 +601,7 @@ interface ResourceForecast {
                               step="0.01" 
                               placeholder="0.00" 
                               {...field}
+                              value={field.value ?? ""}
                               onChange={(e) => field.onChange(e.target.value)} 
                             />
                           </FormControl>
@@ -590,7 +615,7 @@ interface ResourceForecast {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Status</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select onValueChange={field.onChange} defaultValue={field.value ?? undefined}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select status" />
@@ -617,7 +642,7 @@ interface ResourceForecast {
                         <FormItem>
                           <FormLabel>Start Date</FormLabel>
                           <FormControl>
-                            <Input type="date" {...field} />
+                            <Input type="date" {...field} value={field.value ?? ""}/>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -924,7 +949,7 @@ interface ResourceForecast {
                     <FormItem>
                       <FormLabel>Description</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Enter project description" {...field} />
+                        <Textarea placeholder="Enter project description" {...field} value={field.value ?? ""}/>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -944,6 +969,7 @@ interface ResourceForecast {
                             step="0.01" 
                             placeholder="0.00" 
                             {...field}
+                            value={field.value ?? ""}
                             onChange={(e) => field.onChange(e.target.value)}
                           />
                         </FormControl>
@@ -1149,7 +1175,7 @@ interface ResourceForecast {
                                   value={roleCard.assignedUserId || "unassigned"}
                                   onValueChange={(value) => {
                                     const updatedRoles = [...(field.value || [])];
-                                    const assignedUser = value === "unassigned" ? null : users?.find(u => u.id === value);
+                                    const assignedUser = value === "unassigned" ? null : users?.find(u => u.id === Number(value));
                                     updatedRoles[index] = {
                                       ...roleCard,
                                       assignedUserId: value === "unassigned" ? null : value,

@@ -5,6 +5,13 @@ import { storage } from "@/app/lib/storage";
 export async function POST(req: Request) {
   try {
     const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const { weekCommencing, days } = await req.json();
 
     const weekStart = new Date(weekCommencing);
@@ -14,8 +21,9 @@ export async function POST(req: Request) {
     const existingRejected = await storage.getTimesheetsByDateRange(
       weekCommencing,
       weekEnd.toISOString().split("T")[0],
-      user.id,
+      user.id
     );
+
     for (const t of existingRejected) {
       if (t.status === "rejected") {
         await storage.updateTimesheet(t.id, { status: "draft" });
@@ -28,7 +36,7 @@ export async function POST(req: Request) {
     const existingTimesheets = await storage.getTimesheetsByDateRange(
       weekCommencing,
       weekEnd.toISOString().split("T")[0],
-      user.id,
+      user.id
     );
 
     for (const day of days) {
@@ -79,7 +87,7 @@ export async function POST(req: Request) {
         userId: managerId,
         type: "timesheet_submitted",
         title: "New Timesheet for Approval",
-        message: `${user.firstName || "A team member"} submitted a timesheet for week commencing ${weekCommencing}`,
+        message: `${user.firstName ?? "A team member"} submitted a timesheet for week commencing ${weekCommencing}`,
         actionRequired: true,
         actionUrl: "/approvals",
         actionText: "Review Timesheet",
@@ -87,9 +95,15 @@ export async function POST(req: Request) {
       });
     }
 
-    return NextResponse.json({ message: "Timesheet submitted successfully", timesheets: submittedTimesheets });
+    return NextResponse.json({
+      message: "Timesheet submitted successfully",
+      timesheets: submittedTimesheets,
+    });
   } catch (error) {
     console.error("Error submitting timesheet:", error);
-    return NextResponse.json({ message: "Failed to submit timesheet" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Failed to submit timesheet" },
+      { status: 500 }
+    );
   }
 }
