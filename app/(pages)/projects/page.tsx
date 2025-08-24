@@ -1036,7 +1036,7 @@ interface ResourceForecast {
 
                   <FormField
                     control={editForm.control}
-                    name="totalHours"
+                    name="roleCards.0.totalHours"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Total Hours</FormLabel>
