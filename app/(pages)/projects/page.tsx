@@ -1046,7 +1046,11 @@ interface ResourceForecast {
                             step="0.1" 
                             placeholder="0" 
                             {...field}
-                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : 0)}
+                            value={typeof field.value === "number" ? field.value : 0} // ensures number
+                            onChange={(e) => {
+                              const val = parseFloat(e.target.value);
+                              field.onChange(isNaN(val) ? 0 : val); // always a number
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
