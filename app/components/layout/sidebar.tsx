@@ -57,6 +57,11 @@ export default function Sidebar() {
 
   const { data: managerMetrics } = useQuery<ManagerMetrics>({
     queryKey: ["/api/analytics/manager"],
+    queryFn: async () => {
+      const res = await fetch("/api/analytics/manager");
+      if (!res.ok) throw new Error("Failed to fetch manager metrics");
+      return res.json();
+    },
     enabled: user?.role === "project_manager" || user?.role === "admin",
   });
 
