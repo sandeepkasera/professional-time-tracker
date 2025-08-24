@@ -179,17 +179,17 @@ export default function Approvals() {
     setShowBulkRejectModal(true);
   };
 
-  const confirmBulkReject = () => {
-    if (!rejectionReason.trim()) {
-      toast({
-        title: "Error",
-        description: "Please provide a reason for rejection",
-        variant: "destructive",
-      });
-      return;
-    }
-    bulkRejectMutation.mutate({ ids: selectedTimesheets, reason: rejectionReason });
-  };
+  // const confirmBulkReject = () => {
+  //   if (!rejectionReason.trim()) {
+  //     toast({
+  //       title: "Error",
+  //       description: "Please provide a reason for rejection",
+  //       variant: "destructive",
+  //     });
+  //     return;
+  //   }
+  //   bulkRejectMutation.mutate({ ids: selectedTimesheets, reason: rejectionReason });
+  // };
 
   const handleSelectTimesheet = (id: number, checked: boolean) => {
     if (checked) {
